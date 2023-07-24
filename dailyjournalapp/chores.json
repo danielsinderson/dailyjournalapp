@@ -1,0 +1,13 @@
+{
+    "clean fridge": 1,
+    "clean toilets": 2,
+    "clean sinks": 2,
+    "de-clutter kitchen": 2,
+    "de-clutter garage": 1,
+    "de-spider back of house": 1,
+    "de-spider front of house": 1,
+    "de-spider garage": 1,
+    "dust": 1,
+    "mop": 2,
+    "organize kids' toys": 1
+}
