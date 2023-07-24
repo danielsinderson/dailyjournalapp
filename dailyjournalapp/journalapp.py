@@ -6,6 +6,7 @@ It will do the following:
     3. Generate a poetry prompt for a short free writing session
     4. Pull a previous day's entry for review before writing a short journal entry
     5. Collect the poetry freewrite and the journal entry into .md file and add it to Obsidian notebook
+    6. Print out current state of projects (track progress in json)
 """
 
 def select_chore() -> str:
