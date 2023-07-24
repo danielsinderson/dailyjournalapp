@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "dailyjournalapp"
+version = "0.1.0"
+description = "A simple CLI application for my personal use."
+authors = ["Daniel Sinderson <drsinderson@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+spacy = "^3.6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
