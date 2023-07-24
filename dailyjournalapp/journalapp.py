@@ -9,7 +9,7 @@ It will do the following:
     6. Print out current state of projects (track progress in json)
 """
 
-import sys
+import os
 import datetime
 import json
 import random
@@ -21,7 +21,8 @@ def select_chore() -> str:
     
     Returns string containing the chore to do that day
     """
-    with open('chores.json') as chores_file:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(script_dir + '/chores.json') as chores_file:
         chores = json.load(chores_file)
     
     chores_list = [chore * chores[chore] for chore in chores.keys()]
@@ -29,23 +30,23 @@ def select_chore() -> str:
 
 
 def select_flashcards() -> dict:
-    pass
+    return {}
 
 
 def generate_prompt() -> str:
-    pass
+    return ''
 
 
 def select_previous_entry() -> str:
-    pass
+    return ''
 
 
 def display_contents(chore: str, 
                      flashcards: dict, 
                      prompt: str,
                      previous_entry: str
-                     ) -> tuple(str, str):
-    pass
+                     ) -> tuple:
+    return ('', '')
 
 
 def collect_entry_and_write_to_markdown(poem: str, journal_entry: str) -> None:
@@ -54,16 +55,17 @@ def collect_entry_and_write_to_markdown(poem: str, journal_entry: str) -> None:
 
 def main():
     chore: str = select_chore()
+    print(chore)
     flashcards: dict = select_flashcards()
     prompt: str = generate_prompt()
     previous_entry: str = select_previous_entry()
     
-    poem, journal: tuple(str, str) = display_contents(chore, 
+    result: tuple = display_contents(chore, 
                                                       flashcards,
                                                       prompt,
                                                       previous_entry)
     
-    collect_entry_and_write_to_markdown(poem, journal)
+    collect_entry_and_write_to_markdown(result[0], result[1])
 
 
 if __name__ == "__main__":
