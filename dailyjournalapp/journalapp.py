@@ -22,7 +22,7 @@ def select_chore() -> str:
     Returns string containing the chore to do that day
     """
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(script_dir + '/chores.json') as chores_file:
+    with open(script_dir + '/data/chores.json') as chores_file:
         chores = json.load(chores_file)
     
     chores_list = [chore for chore in chores.keys() for i in range(chores[chore])]
@@ -36,7 +36,7 @@ def select_workout() -> str:
     Returns string containing the chore to do that day
     """
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    with open(script_dir + '/daily_workout.json') as workouts_file:
+    with open(script_dir + '/data/daily_workout.json') as workouts_file:
         workouts = json.load(workouts_file)
     
     light_workout: bool = (datetime.date.today().day % 2)
