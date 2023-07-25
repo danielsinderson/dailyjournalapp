@@ -29,8 +29,22 @@ def select_chore() -> str:
     return random.choice(chores_list)
 
 
-def select_flashcards() -> dict:
-    return {}
+def select_workout(light_workout: bool) -> str:
+    """
+    Accesses daily_workout.json, loads it, and randomly selects a chore based on weighting.
+    
+    Returns string containing the chore to do that day
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(script_dir + '/daily_workout.json') as workouts_file:
+        workouts = json.load(workouts_file)
+    
+    if light_workout:
+        workout = random.choice(workouts["light workouts"].keys())
+        return workouts["light workouts"][workout]
+    else:
+        workout = random.choice(workouts["workouts"].keys())
+        return workouts["workouts"][workout]
 
 
 def generate_prompt() -> str:
