@@ -25,11 +25,11 @@ def select_chore() -> str:
     with open(script_dir + '/chores.json') as chores_file:
         chores = json.load(chores_file)
     
-    chores_list = [chore * chores[chore] for chore in chores.keys()]
+    chores_list = [chore for chore in chores.keys() for i in range(chores[chore])]
     return random.choice(chores_list)
 
 
-def select_workout(light_workout: bool) -> str:
+def select_workout() -> str:
     """
     Accesses daily_workout.json, loads it, and randomly selects a chore based on weighting.
     
@@ -39,12 +39,13 @@ def select_workout(light_workout: bool) -> str:
     with open(script_dir + '/daily_workout.json') as workouts_file:
         workouts = json.load(workouts_file)
     
+    light_workout: bool = (datetime.date.today().day % 2)
+    
+    
     if light_workout:
-        workout = random.choice(workouts["light workouts"].keys())
-        return workouts["light workouts"][workout]
+        return '\n'.join(random.choice(workouts["light workouts"]))
     else:
-        workout = random.choice(workouts["workouts"].keys())
-        return workouts["workouts"][workout]
+        return '\n'.join(random.choice(workouts["workouts"]))
 
 
 def generate_prompt() -> str:
@@ -55,31 +56,23 @@ def select_previous_entry() -> str:
     return ''
 
 
-def display_contents(chore: str, 
-                     flashcards: dict, 
-                     prompt: str,
-                     previous_entry: str
-                     ) -> tuple:
-    return ('', '')
-
-
-def collect_entry_and_write_to_markdown(poem: str, journal_entry: str) -> None:
+def write_contents_to_markdown(chore: str, 
+                               workout: str, 
+                               prompt: str,
+                               previous_entry: str
+                               ) -> None:
     pass
 
 
 def main():
     chore: str = select_chore()
     print(chore)
-    flashcards: dict = select_flashcards()
+    workout: str = select_workout()
+    print(workout)
     prompt: str = generate_prompt()
     previous_entry: str = select_previous_entry()
     
-    result: tuple = display_contents(chore, 
-                                    flashcards,
-                                    prompt,
-                                    previous_entry)
-    
-    collect_entry_and_write_to_markdown(result[0], result[1])
+    write_contents_to_markdown()
 
 
 if __name__ == "__main__":
