@@ -61,9 +61,9 @@ def main():
     previous_entry: str = select_previous_entry()
     
     result: tuple = display_contents(chore, 
-                                                      flashcards,
-                                                      prompt,
-                                                      previous_entry)
+                                    flashcards,
+                                    prompt,
+                                    previous_entry)
     
     collect_entry_and_write_to_markdown(result[0], result[1])
 
