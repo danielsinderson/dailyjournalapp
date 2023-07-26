@@ -45,7 +45,7 @@ def select_workouts() -> list:
     return [light_workout, workout]
 
 
-def generate_lens() -> str:
+def select_lens() -> str:
     """
     Accesses procgen_tarot.json, loads it, and randomly selects a card.
     
@@ -77,7 +77,7 @@ def main():
     print(chore)
     workout_options: list = select_workouts()
     print(workout_options)
-    lens: str = generate_lens()
+    lens: str = select_lens()
     print(lens)
     previous_entry: str = select_previous_entry()
     
