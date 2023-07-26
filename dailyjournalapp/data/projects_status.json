@@ -22,7 +22,7 @@
       {
         "project_name": "Museglob",
         "project_description": "A series of low-fidelity text generators whose purpose is to create messy, nonsense texts that's nonetheless inspiring and that generates ideas and unexpected images.",
-        "status": "Not Started",
+        "status": "In Progress",
         "subgoals": [
           {
             "subgoal_name": "Scrape text from allpoetry.com with beautifulsoup.",
@@ -49,7 +49,7 @@
       {
         "project_name": "Arduino Bandmate",
         "project_description": "Build a procudural music generation algorithm that fits on an ESP32 utilizing 'Groove Space' and composite FM synthesis.",
-        "status": "In Progress",
+        "status": "Paused",
         "subgoals": [
           {
             "subgoal_name": "Mathematically define Groove Space.",
@@ -57,7 +57,7 @@
           },
           {
             "subgoal_name": "Create a graph structure in C.",
-            "status": "In Progress"
+            "status": "Not Started"
           },
           {
             "subgoal_name": "Create graph traversal function in C.",
