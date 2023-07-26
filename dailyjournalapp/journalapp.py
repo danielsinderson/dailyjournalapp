@@ -10,12 +10,13 @@ It will do the following:
 """
 
 import os
-import datetime
+from datetime import datetime
 import json
 import random
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
+notes_dir = "/home/drs/Documents/Notebook/_Daily To-Do/"
 
 
 def select_chore() -> str:
@@ -28,7 +29,7 @@ def select_chore() -> str:
         chores: dict = json.load(chores_file)
     
     chores_list = [chore for chore in chores.keys() for i in range(chores[chore])]
-    return f'Your chore for the day is to {random.choice(chores_list)}.'
+    return f'- Your chore for the day is to {random.choice(chores_list)}.'
 
 
 def select_workouts() -> str:
@@ -42,9 +43,8 @@ def select_workouts() -> str:
     
     light_workout = random.choice(workouts["light workouts"])
     workout = random.choice(workouts["workouts"])
-    workout_options = f'Your light workout option is to do a {light_workout} ' \
-        f'and your regular workout option is to do a {workout}. ' \
-        f'If you feel like going for a heavier workout, just increase the intensity of either one and/or do both.'
+    workout_options = f'- Your light workout option is to do a {light_workout}.\n' \
+        f'- Your regular workout option is to do a {workout}.'
     return workout_options
 
 
@@ -59,12 +59,8 @@ def select_lens() -> str:
         cards: list = tarot['cards']
     
     card = random.choice(cards)
-    lens = f'Your lens for the day is {card["word"]}. {card["interpretation"]}'
+    lens = f'- Your lens for the day is {card["word"]}.\n- {card["interpretation"]}'
     return lens
-
-
-def select_previous_entry() -> str:
-    return ''
 
 
 def show_project_statuses() -> str:
@@ -76,17 +72,26 @@ def show_project_statuses() -> str:
     for project in in_progress:
         project_name = project['project_name']
         subgoals_in_progress = [subgoal['subgoal_name'] for subgoal in project['subgoals'] if subgoal['status'] == 'In Progress']
-        statuses += "\n\n" + project_name + "\n - " + "\n - ".join(subgoals_in_progress)
+        statuses += "- " + project_name + "\n    - " + "\n    - ".join(subgoals_in_progress) + "\n"
     return statuses
 
 
 def write_contents_to_markdown(chore: str, 
                                workouts: str, 
                                lens: str,
-                               previous_entry: str,
                                project_statuses: str
                                ) -> None:
-    pass
+    note = (
+        "##### Daily Chore:\n" + chore + "\n\n" + 
+        "##### Daily Workout Options:\n" + workouts + "\n\n" + 
+        "##### Daily Lens:\n" + lens + "\n" +
+        "------------------------------------\n"
+        "##### Current Project Statuses:\n" + project_statuses
+    )
+    current_date = datetime.now()
+    date = f'{current_date.year}-{current_date.month}-{current_date.day}'
+    with open(notes_dir + f"_dailynote_{date}.md", "w") as note_file:
+        note_file.write(f"Daily note for {date}:\n\n" + note)
 
 
 def main():
@@ -98,12 +103,10 @@ def main():
     print(lens)
     project_statuses: str = show_project_statuses()
     print(project_statuses)
-    previous_entry: str = select_previous_entry()
     
     write_contents_to_markdown(chore=chore,
                                workouts=workout_options,
                                lens=lens,
-                               previous_entry=previous_entry,
                                project_statuses=project_statuses)
 
 
