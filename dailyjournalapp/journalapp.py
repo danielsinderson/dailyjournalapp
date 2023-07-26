@@ -28,8 +28,24 @@ def select_chore() -> str:
     with open(script_dir + '/data/chores.json') as chores_file:
         chores: dict = json.load(chores_file)
     
-    chores_list = [chore for chore in chores.keys() for i in range(chores[chore])]
-    return f'- Your chore for the day is to {random.choice(chores_list)}.'
+    # create a list of chores 
+    chores_list = [chore for chore in chores.keys()]
+    #filter out the chores that have already been completed this cycle
+    filtered_list = [chore for chore in chores_list if chores[chore][0] != chores[chore][1]]
+    
+    if filtered_list == []:  # if all chores have been completed, restart the cycle
+        for chore in chores.keys():
+            chores[chore][0] = 0
+        chore = random.choice(chores_list)
+    else:  # else pick one of the remaining chores at random
+        chore = random.choice(filtered_list)
+    
+    # update the JSON file
+    chores[chore][0] += 1
+    with open(script_dir + '/data/chores.json', 'w') as chores_file:
+            json.dump(chores, chores_file)
+    
+    return f'- Your chore for the day is to {chore}.'
 
 
 def select_workouts() -> str:
@@ -104,10 +120,10 @@ def main():
     project_statuses: str = show_project_statuses()
     print(project_statuses)
     
-    write_contents_to_markdown(chore=chore,
-                               workouts=workout_options,
-                               lens=lens,
-                               project_statuses=project_statuses)
+    # write_contents_to_markdown(chore=chore,
+    #                           workouts=workout_options,
+    #                           lens=lens,
+    #                           project_statuses=project_statuses)
 
 
 if __name__ == "__main__":
