@@ -1,0 +1,100 @@
+{
+    "projects": [
+      {
+        "project_name": "Symmetry Analysis Research Project",
+        "project_description": "Summer research project learning symmetry methods for differential equations and then appyling them to the Born-Infeld equation and its linearization. Working with Professor Brandon Ashley, Will Helman, and Andrew Eskenazi.",
+        "status": "In Progress",
+        "subgoals": [
+          {
+            "subgoal_name": "Understand the basic overview of the technique.",
+            "status": "Complete"
+          },
+          {
+            "subgoal_name": "Understand how to apply the technique to 1st order ODEs.",
+            "status": "In Progress"
+          },
+          {
+            "subgoal_name": "Understand how to apply extend the technique to higher order ODEs.",
+            "status": "In Progress"
+          }
+        ]
+      },
+      {
+        "project_name": "Museglob",
+        "project_description": "A series of low-fidelity text generators whose purpose is to create messy, nonsense texts that's nonetheless inspiring and that generates ideas and unexpected images.",
+        "status": "Not Started",
+        "subgoals": [
+          {
+            "subgoal_name": "Scrape text from allpoetry.com with beautifulsoup.",
+            "status": "Not Started"
+          },
+          {
+            "subgoal_name": "Clean text and tokenize into a usable corpus with spaCy.",
+            "status": "Not Started"
+          },
+          {
+            "subgoal_name": "Build n-grams from the corpus.",
+            "status": "Not Started"
+          },
+          {
+            "subgoal_name": "Build Markov model of the corpus.",
+            "status": "Not Started"
+          },
+          {
+            "subgoal_name": "Build small language model of the corpus.",
+            "status":"Not Started"
+          }
+        ]
+      },
+      {
+        "project_name": "Arduino Bandmate",
+        "project_description": "Build a procudural music generation algorithm that fits on an ESP32 utilizing 'Groove Space' and composite FM synthesis.",
+        "status": "In Progress",
+        "subgoals": [
+          {
+            "subgoal_name": "Mathematically define Groove Space.",
+            "status": "Complete"
+          },
+          {
+            "subgoal_name": "Create a graph structure in C.",
+            "status": "In Progress"
+          },
+          {
+            "subgoal_name": "Create graph traversal function in C.",
+            "status": "Not Started"
+          },
+          {
+            "subgoal_name": "Build Groove Space model in JSON.",
+            "status": "Not Started"
+          },
+          {
+            "subgoal_name": "Build Groove Space in C.",
+            "status":"Not Started"
+          }
+        ]
+      },
+      {
+        "project_name": "Procedural Generation Algorithms in Lua",
+        "project_description": "A series of procedural generation tools, mostly targeting game dev for use with Love2D.",
+        "status": "In Progress",
+        "subgoals": [
+            {
+                "subgoal_name": "Learn Lua",
+                "status":"In Progress"
+            },
+            {
+                "subgoal_name": "Build Wave Function Collapse algorithm for generating maps.",
+                "status":"Not Started"
+            },
+            {
+                "subgoal_name": "Port the improv.js library to Lua for generating text based on grammars and world-models.",
+                "status": "Not Started"
+            },
+            {
+                "subgoal_name": "Design system for generating relationship networks within a group of npcs.",
+                "status": "Not Started"
+            }
+        ]
+      }
+    ]
+  }
