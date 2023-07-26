@@ -67,21 +67,24 @@ def select_previous_entry() -> str:
     return ''
 
 
-def show_project_statuses() -> dict:
+def show_project_statuses() -> str:
     with open(script_dir + '/data/projects_status.json') as project_statuses_file:
         projects: list = json.load(project_statuses_file)['projects']
     
     in_progress = [project for project in projects if project['status'] == 'In Progress']
-        
-    
-    return ''
+    statuses = ""
+    for project in in_progress:
+        project_name = project['project_name']
+        subgoals_in_progress = [subgoal['subgoal_name'] for subgoal in project['subgoals'] if subgoal['status'] == 'In Progress']
+        statuses += "\n\n" + project_name + "\n - " + "\n - ".join(subgoals_in_progress)
+    return statuses
 
 
 def write_contents_to_markdown(chore: str, 
                                workouts: str, 
                                lens: str,
                                previous_entry: str,
-                               project_statuses: dict
+                               project_statuses: str
                                ) -> None:
     pass
 
@@ -93,7 +96,7 @@ def main():
     print(workout_options)
     lens: str = select_lens()
     print(lens)
-    project_statuses: dict = show_project_statuses()
+    project_statuses: str = show_project_statuses()
     print(project_statuses)
     previous_entry: str = select_previous_entry()
     
