@@ -120,10 +120,10 @@ def main():
     project_statuses: str = show_project_statuses()
     print(project_statuses)
     
-    # write_contents_to_markdown(chore=chore,
-    #                           workouts=workout_options,
-    #                           lens=lens,
-    #                           project_statuses=project_statuses)
+    write_contents_to_markdown(chore=chore,
+                              workouts=workout_options,
+                              lens=lens,
+                              project_statuses=project_statuses)
 
 
 if __name__ == "__main__":
