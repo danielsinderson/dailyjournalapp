@@ -9,6 +9,7 @@ It will do the following:
     6. Print out current state of projects (track progress in json)
 """
 
+import sys
 import os
 from datetime import datetime
 import json
@@ -40,11 +41,6 @@ def select_chore() -> str:
         chore = random.choice(chores_list)
     else:  # else pick one of the remaining chores at random
         chore = random.choice(filtered_list)
-    
-    # update the JSON file
-    chores[chore][0] += 1
-    with open(data_dir + 'chores.json', 'w') as chores_file:
-            json.dump(chores, chores_file)
     
     return f'- [ ] Your chore for the day is to {chore}.'
 
@@ -88,7 +84,7 @@ def show_project_statuses() -> str:
     statuses = ""
     for project in in_progress:
         project_name = project['project_name']
-        subgoals_in_progress = [subgoal['subgoal_name'] for subgoal in project['subgoals'] if subgoal['status'] == 'In Progress']
+        subgoals_in_progress = [subgoal for subgoal in project['subgoals'].keys() if project['subgoals'][subgoal] == 'In Progress']
         statuses += "- [ ] " + project_name + "\n    - [ ] " + "\n    - [ ] ".join(subgoals_in_progress) + "\n"
     return statuses
 
@@ -111,7 +107,7 @@ def write_contents_to_markdown(chore: str,
         note_file.write(f"Daily note for {date}:\n\n" + note)
 
 
-def main():
+def create_new_entry() -> None:
     chore: str = select_chore()
     print(chore)
     workout_options: str = select_workouts()
@@ -125,6 +121,108 @@ def main():
                               workouts=workout_options,
                               lens=lens,
                               project_statuses=project_statuses)
+
+
+def update_chores(chore: str) -> None:
+    # parse if task is done
+    done = (chore[0:5] == '- [x]')
+    
+    # remove clutter from string
+    chore = chore[35:-1]
+    
+    # import json as dictionary and then update the dictionary
+    with open(data_dir + 'chores.json') as chores_file:
+        chores: dict = json.load(chores_file)
+    
+    if done:
+        chores[chore][0] += 1
+    
+    # export the dictionary to update json
+    with open(data_dir + 'chores.json', 'w') as chores_file:
+            json.dump(chores, chores_file, indent=2)
+
+
+def update_workouts(workouts: list) -> None:  # this doesn't do anything right now it's a placeholder for if I want to implement something later
+    # remove clutter from string
+    
+    
+    # import json as dictionary and then update the dictionary
+    with open(data_dir + 'daily_workouts.json') as workouts_file:
+        workouts: dict = json.load(workouts_file)
+    
+    
+    # export the dictionary to update json
+    with open(data_dir + 'daily_workouts.json', 'w') as workouts_file:
+            json.dump(workouts, workouts_file)
+
+
+def update_project_statuses(statuses: list) -> None:
+    # parse the statuses of the project goals / subgoals from the day to see what got done
+    parsed_statuses = {}
+    
+    for status in statuses:
+        subgoal = (status[0:4] == '    ')
+        completed = (status[0:9] == '    - [x]') if subgoal else (status[0:5] == '- [x]')
+        task = status[10:] if subgoal else status[6:]
+        parsed_statuses[task] = { 'is_subgoal': subgoal, 'is_completed': completed }
+    print(parsed_statuses)
+    
+    
+    # import json as dictionary and then update the dictionary
+    with open(data_dir + 'projects_status.json') as status_file:
+        statuses: dict = json.load(status_file)
+    
+    for project_task, project_status in parsed_statuses.items():
+        if not project_status['is_completed']:
+            continue
+        
+        for project in statuses['projects']:
+            if project_status['is_subgoal']:
+                for subgoal in project['subgoals'].keys():
+                    if subgoal == project_task:
+                        project['subgoals'][subgoal] = 'Complete'
+            else: 
+                if project['project_name'] == project_task:
+                    project['status'] = 'Complete'
+            
+    # export the dictionary to update json
+    with open(data_dir + 'projects_status.json', 'w') as status_file:
+            json.dump(statuses, status_file, indent=2)
+
+
+def update_data_files() -> None:
+    current_date = datetime.now()
+    date = f'{current_date.year}-{current_date.month}-{current_date.day}'
+    
+    with open(notes_dir + f"dailynote_{date}.md", "r") as note_file:
+        note: str = note_file.read()
+    
+    lines = note.splitlines()
+    
+    chore = lines[3]
+    update_chores(chore)
+    
+    workouts = lines[6:8]
+    #update_workouts(workouts)
+    
+    project_statuses = lines[14:]
+    update_project_statuses(project_statuses)
+
+
+def main():
+    if len(sys.argv) < 2:
+        print("Sorry, you didn't specify a parameter")
+        print(f"The correct format is journalapp.py CREATE|UPDATE")
+        sys.exit()
+    
+    option = sys.argv[1]
+
+    if option == "create":
+        create_new_entry()
+    elif option == "update":
+        update_data_files()
+    else:
+        pass
 
 
 if __name__ == "__main__":
