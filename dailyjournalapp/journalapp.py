@@ -54,11 +54,11 @@ def select_workouts() -> str:
     with open(data_dir + 'daily_workout.json') as workouts_file:
         workouts: dict = json.load(workouts_file)
     
-    light_workout = random.choice(workouts["light workouts"])
-    workout = random.choice(workouts["workouts"])
-    workout_options = f'- [ ] Your light workout option is to do a {light_workout}.\n' \
-        f'- [ ] Your regular workout option is to do a {workout}.'
-    return workout_options
+    day = workouts['current_day']
+    workout = workouts['schedule'][day]
+    workout_string = "- [ ] Your workout for today is to do the following exercises:\n"
+    workout_string += "    - [ ] " + "\n    - [ ] ".join(workout)
+    return workout_string
 
 
 def select_lens() -> str:
@@ -142,18 +142,19 @@ def update_chores(chore: str) -> None:
             json.dump(chores, chores_file, indent=2)
 
 
-def update_workouts(workouts: list) -> None:  # this doesn't do anything right now it's a placeholder for if I want to implement something later
+def update_workouts(workouts: list) -> None:
     # remove clutter from string
     
     
     # import json as dictionary and then update the dictionary
-    with open(data_dir + 'daily_workouts.json') as workouts_file:
+    with open(data_dir + 'daily_workout.json') as workouts_file:
         workouts: dict = json.load(workouts_file)
-    
+    workouts['current_day'] += 1
+    workouts['current_day'] %= 7
     
     # export the dictionary to update json
-    with open(data_dir + 'daily_workouts.json', 'w') as workouts_file:
-            json.dump(workouts, workouts_file)
+    with open(data_dir + 'daily_workout.json', 'w') as workouts_file:
+            json.dump(workouts, workouts_file, indent=2)
 
 
 def update_project_statuses(statuses: list) -> None:
@@ -164,9 +165,7 @@ def update_project_statuses(statuses: list) -> None:
         subgoal = (status[0:4] == '    ')
         completed = (status[0:9] == '    - [x]') if subgoal else (status[0:5] == '- [x]')
         task = status[10:] if subgoal else status[6:]
-        parsed_statuses[task] = { 'is_subgoal': subgoal, 'is_completed': completed }
-    print(parsed_statuses)
-    
+        parsed_statuses[task] = { 'is_subgoal': subgoal, 'is_completed': completed }    
     
     # import json as dictionary and then update the dictionary
     with open(data_dir + 'projects_status.json') as status_file:
@@ -203,7 +202,7 @@ def update_data_files() -> None:
     update_chores(chore)
     
     workouts = lines[6:8]
-    #update_workouts(workouts)
+    update_workouts(workouts)
     
     project_statuses = lines[14:]
     update_project_statuses(project_statuses)
