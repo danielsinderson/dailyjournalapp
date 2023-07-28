@@ -16,7 +16,8 @@ import random
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-notes_dir = "/home/drs/Documents/Notebook/_Daily To-Do/"
+data_dir = script_dir + '/data/'
+notes_dir = script_dir + '/daily_notes/'
 
 
 def select_chore() -> str:
@@ -25,7 +26,7 @@ def select_chore() -> str:
     
     Returns string containing the chore to do that day
     """
-    with open(script_dir + '/data/chores.json') as chores_file:
+    with open(data_dir + 'chores.json') as chores_file:
         chores: dict = json.load(chores_file)
     
     # create a list of chores 
@@ -42,10 +43,10 @@ def select_chore() -> str:
     
     # update the JSON file
     chores[chore][0] += 1
-    with open(script_dir + '/data/chores.json', 'w') as chores_file:
+    with open(data_dir + 'chores.json', 'w') as chores_file:
             json.dump(chores, chores_file)
     
-    return f'- Your chore for the day is to {chore}.'
+    return f'- [ ] Your chore for the day is to {chore}.'
 
 
 def select_workouts() -> str:
@@ -54,13 +55,13 @@ def select_workouts() -> str:
     
     Returns string containing the workout options to do that day
     """
-    with open(script_dir + '/data/daily_workout.json') as workouts_file:
+    with open(data_dir + 'daily_workout.json') as workouts_file:
         workouts: dict = json.load(workouts_file)
     
     light_workout = random.choice(workouts["light workouts"])
     workout = random.choice(workouts["workouts"])
-    workout_options = f'- Your light workout option is to do a {light_workout}.\n' \
-        f'- Your regular workout option is to do a {workout}.'
+    workout_options = f'- [ ] Your light workout option is to do a {light_workout}.\n' \
+        f'- [ ] Your regular workout option is to do a {workout}.'
     return workout_options
 
 
@@ -70,7 +71,7 @@ def select_lens() -> str:
     
     Returns string containing the day's reading to use for reflection.
     """
-    with open(script_dir + '/data/procgen_tarot.json') as tarot_file:
+    with open(data_dir + 'procgen_tarot.json') as tarot_file:
         tarot: dict = json.load(tarot_file)
         cards: list = tarot['cards']
     
@@ -80,7 +81,7 @@ def select_lens() -> str:
 
 
 def show_project_statuses() -> str:
-    with open(script_dir + '/data/projects_status.json') as project_statuses_file:
+    with open(data_dir + 'projects_status.json') as project_statuses_file:
         projects: list = json.load(project_statuses_file)['projects']
     
     in_progress = [project for project in projects if project['status'] == 'In Progress']
@@ -88,7 +89,7 @@ def show_project_statuses() -> str:
     for project in in_progress:
         project_name = project['project_name']
         subgoals_in_progress = [subgoal['subgoal_name'] for subgoal in project['subgoals'] if subgoal['status'] == 'In Progress']
-        statuses += "- " + project_name + "\n    - " + "\n    - ".join(subgoals_in_progress) + "\n"
+        statuses += "- [ ] " + project_name + "\n    - [ ] " + "\n    - [ ] ".join(subgoals_in_progress) + "\n"
     return statuses
 
 
@@ -106,7 +107,7 @@ def write_contents_to_markdown(chore: str,
     )
     current_date = datetime.now()
     date = f'{current_date.year}-{current_date.month}-{current_date.day}'
-    with open(notes_dir + f"_dailynote_{date}.md", "w") as note_file:
+    with open(notes_dir + f"dailynote_{date}.md", "w") as note_file:
         note_file.write(f"Daily note for {date}:\n\n" + note)
 
 
