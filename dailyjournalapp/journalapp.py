@@ -89,17 +89,55 @@ def show_project_statuses() -> str:
     return statuses
 
 
+def show_special_events() -> list:
+    with open(data_dir + 'special_events.json') as events_file:
+        events: list = json.load(events_file)['events']
+    
+    current_date = datetime.now()
+    date = f'{current_date.month}-{current_date.day}'
+    
+    events_today = []
+    reminders_today = []
+    for event in events:
+        print(event['date'], date)
+        if event['date'] == date:
+            events_today.append(event['name'])
+        elif event['reminder'] == date or event['second reminder'] == date:
+            split_reminder_date = event['reminder'].split('-')
+            split_event_date = event['date'].split('-')
+            
+            same_year = int(split_reminder_date[0]) <= int(split_event_date[0])
+            year = current_date.year if same_year else current_date.year + 1
+            event_date = datetime(year=year, month=int(split_event_date[0]), day=int(split_event_date[1]))
+            print(event_date, current_date)
+            delta = event_date - current_date
+            
+            reminders_today.append(f"{event['name']} will be on {event['date']}, just {delta.days} days away.")
+    print(events_today, reminders_today)
+    
+    special_events = f"The following special events are today!\n- {'- '.join(events_today)}"
+    reminders = f"The following special events with happen soon!\n- {'- '.join(reminders_today)}"
+    
+    return [special_events, reminders]
+    
+    
+
+
 def write_contents_to_markdown(chore: str, 
                                workouts: str, 
                                lens: str,
-                               project_statuses: str
+                               project_statuses: str,
+                               special_events: list
                                ) -> None:
     note = (
         "##### Daily Chore:\n" + chore + "\n\n" + 
         "##### Daily Workout Options:\n" + workouts + "\n\n" + 
         "##### Daily Lens:\n" + lens + "\n" +
-        "------------------------------------\n"
-        "##### Current Project Statuses:\n" + project_statuses
+        "------------------------------------\n" + 
+        "##### Current Project Statuses:\n" + project_statuses + 
+        "------------------------------------\n" + 
+        "##### Special Events:\n" + special_events[0] + "\n\n" +
+        "##### Reminders:\n" + special_events[1]
     )
     current_date = datetime.now()
     date = f'{current_date.year}-{current_date.month}-{current_date.day}'
@@ -116,11 +154,14 @@ def create_new_entry() -> None:
     print(lens)
     project_statuses: str = show_project_statuses()
     print(project_statuses)
+    events: str = show_special_events()
+    print(events)
     
     write_contents_to_markdown(chore=chore,
                               workouts=workout_options,
                               lens=lens,
-                              project_statuses=project_statuses)
+                              project_statuses=project_statuses,
+                              special_events=events)
 
 
 def update_chores(chore: str) -> None:
