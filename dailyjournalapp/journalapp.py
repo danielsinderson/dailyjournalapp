@@ -89,55 +89,49 @@ def show_project_statuses() -> str:
     return statuses
 
 
-def show_special_events() -> list:
+def show_special_events() -> str:
     with open(data_dir + 'special_events.json') as events_file:
         events: list = json.load(events_file)['events']
     
     current_date = datetime.now()
-    date = f'{current_date.month}-{current_date.day}'
+    date = f'{current_date.month}-{current_date.day}-{current_date.year}'
     
-    events_today = []
     reminders_today = []
     for event in events:
-        print(event['date'], date)
-        if event['date'] == date:
-            events_today.append(event['name'])
-        elif event['reminder'] == date or event['second reminder'] == date:
-            split_reminder_date = event['reminder'].split('-')
-            split_event_date = event['date'].split('-')
-            
-            same_year = int(split_reminder_date[0]) <= int(split_event_date[0])
-            year = current_date.year if same_year else current_date.year + 1
-            event_date = datetime(year=year, month=int(split_event_date[0]), day=int(split_event_date[1]))
-            print(event_date, current_date)
-            delta = event_date - current_date
-            
-            reminders_today.append(f"{event['name']} will be on {event['date']}, just {delta.days} days away.")
-    print(events_today, reminders_today)
+        d = event['date'].split('-')
+        month_of_event = int(d[0])
+        day_of_event = int(d[1])
+        year_of_event = int(d[2])
+        event_date = datetime(year=year_of_event, month=month_of_event, day=day_of_event)
+        print(event_date)
+        delta = event_date - current_date
+        
+        if delta.days == -1:
+            reminders_today = [f"{event['name']} is today!"] + reminders_today
+        elif delta.days <= event['reminder']:
+            reminders_today = reminders_today + [f"{event['name']} will be on {event['date']}, just {delta.days} days away."]
     
-    special_events = f"The following special events are today!\n- {'- '.join(events_today)}"
-    reminders = f"The following special events with happen soon!\n- {'- '.join(reminders_today)}"
+    reminders = "The following special events with happen soon!\n- " + "\n- ".join(reminders_today) + "\n"
+    print(reminders)
+    return reminders
     
-    return [special_events, reminders]
-    
-    
-
 
 def write_contents_to_markdown(chore: str, 
                                workouts: str, 
                                lens: str,
                                project_statuses: str,
-                               special_events: list
+                               special_events: str
                                ) -> None:
     note = (
-        "##### Daily Chore:\n" + chore + "\n\n" + 
-        "##### Daily Workout Options:\n" + workouts + "\n\n" + 
+        "##### Daily Chore:\n" + chore + "\n" + 
+        "------------------------------------\n" + 
+        "##### Daily Workout Options:\n" + workouts + "\n" + 
+        "------------------------------------\n" +
         "##### Daily Lens:\n" + lens + "\n" +
         "------------------------------------\n" + 
         "##### Current Project Statuses:\n" + project_statuses + 
         "------------------------------------\n" + 
-        "##### Special Events:\n" + special_events[0] + "\n\n" +
-        "##### Reminders:\n" + special_events[1]
+        "##### Special Events:\n" + special_events + "\n\n"
     )
     current_date = datetime.now()
     date = f'{current_date.year}-{current_date.month}-{current_date.day}'
@@ -183,10 +177,7 @@ def update_chores(chore: str) -> None:
             json.dump(chores, chores_file, indent=2)
 
 
-def update_workouts(workouts: list) -> None:
-    # remove clutter from string
-    
-    
+def update_workouts() -> None:
     # import json as dictionary and then update the dictionary
     with open(data_dir + 'daily_workout.json') as workouts_file:
         workouts: dict = json.load(workouts_file)
@@ -230,6 +221,28 @@ def update_project_statuses(statuses: list) -> None:
             json.dump(statuses, status_file, indent=2)
 
 
+def update_special_events(special_events: list):
+    # find events that happened that day
+    passed_events = [event[2:-10] for event in special_events if event[-6:] == "today!"]
+    print(passed_events)
+            
+    # import json as dictionary and then update the dictionary
+    with open(data_dir + 'special_events.json') as events_file:
+        events: dict = json.load(events_file)
+    
+    for event in events['events']:
+        for passed_event in passed_events:
+            if event['name'] == passed_event:
+                date = event['date'].split('-')
+                date[2] = str(int(date[2]) + 1)
+                event['date'] = '-'.join(date)
+    
+    # export the dictionary to update json
+    with open(data_dir + 'special_events.json', 'w') as events_file:
+            json.dump(events, events_file, indent=2)
+                
+
+
 def update_data_files() -> None:
     current_date = datetime.now()
     date = f'{current_date.year}-{current_date.month}-{current_date.day}'
@@ -237,16 +250,18 @@ def update_data_files() -> None:
     with open(notes_dir + f"dailynote_{date}.md", "r") as note_file:
         note: str = note_file.read()
     
-    lines = note.splitlines()
+    sections = note.split("------------------------------------\n")
     
-    chore = lines[3]
+    chore = sections[0].splitlines()[3]
     update_chores(chore)
     
-    workouts = lines[6:8]
-    update_workouts(workouts)
+    update_workouts()
     
-    project_statuses = lines[14:]
+    project_statuses = sections[3].splitlines()[1:]
     update_project_statuses(project_statuses)
+    
+    special_events = sections[4].splitlines()[1:]
+    update_special_events(special_events)
 
 
 def main():
