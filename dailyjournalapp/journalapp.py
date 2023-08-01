@@ -18,7 +18,8 @@ import random
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = script_dir + '/data/'
-notes_dir = script_dir + '/daily_notes/'
+notes_dir = script_dir + "/daily_notes/"
+
 
 
 def select_chore() -> str:
@@ -85,7 +86,7 @@ def show_project_statuses() -> str:
     for project in in_progress:
         project_name = project['project_name']
         subgoals_in_progress = [subgoal for subgoal in project['subgoals'].keys() if project['subgoals'][subgoal] == 'In Progress']
-        statuses += "- [ ] " + project_name + "\n    - [ ] " + "\n    - [ ] ".join(subgoals_in_progress) + "\n"
+        statuses += "- [ ] " + project_name + "\n    - [ ] " + "\n    - [ ] ".join(subgoals_in_progress[:3]) + "\n"
     return statuses
 
 
@@ -103,16 +104,16 @@ def show_special_events() -> str:
         day_of_event = int(d[1])
         year_of_event = int(d[2])
         event_date = datetime(year=year_of_event, month=month_of_event, day=day_of_event)
-        print(event_date)
         delta = event_date - current_date
         
         if delta.days == -1:
             reminders_today = [f"{event['name']} is today!"] + reminders_today
+        elif delta.days == 0:
+            reminders_today = [f"{event['name']} is tomorrow!"] + reminders_today
         elif delta.days <= event['reminder']:
-            reminders_today = reminders_today + [f"{event['name']} will be on {event['date']}, just {delta.days} days away."]
+            reminders_today = reminders_today + [f"{event['name']} will be on {event['date']}, just {delta.days + 1} days away."]
     
     reminders = "The following special events with happen soon!\n- " + "\n- ".join(reminders_today) + "\n"
-    print(reminders)
     return reminders
     
 
@@ -129,9 +130,9 @@ def write_contents_to_markdown(chore: str,
         "------------------------------------\n" +
         "##### Daily Lens:\n" + lens + "\n" +
         "------------------------------------\n" + 
-        "##### Current Project Statuses:\n" + project_statuses + 
+        "##### Special Events:\n" + special_events +
         "------------------------------------\n" + 
-        "##### Special Events:\n" + special_events + "\n\n"
+        "##### Current Project Statuses:\n" + project_statuses + "\n\n"
     )
     current_date = datetime.now()
     date = f'{current_date.year}-{current_date.month}-{current_date.day}'
@@ -198,6 +199,7 @@ def update_project_statuses(statuses: list) -> None:
         completed = (status[0:9] == '    - [x]') if subgoal else (status[0:5] == '- [x]')
         task = status[10:] if subgoal else status[6:]
         parsed_statuses[task] = { 'is_subgoal': subgoal, 'is_completed': completed }    
+    print(parsed_statuses)
     
     # import json as dictionary and then update the dictionary
     with open(data_dir + 'projects_status.json') as status_file:
@@ -224,7 +226,6 @@ def update_project_statuses(statuses: list) -> None:
 def update_special_events(special_events: list):
     # find events that happened that day
     passed_events = [event[2:-10] for event in special_events if event[-6:] == "today!"]
-    print(passed_events)
             
     # import json as dictionary and then update the dictionary
     with open(data_dir + 'special_events.json') as events_file:
@@ -257,10 +258,10 @@ def update_data_files() -> None:
     
     update_workouts()
     
-    project_statuses = sections[3].splitlines()[1:]
+    project_statuses = sections[4].splitlines()[1:]
     update_project_statuses(project_statuses)
     
-    special_events = sections[4].splitlines()[1:]
+    special_events = sections[3].splitlines()[1:]
     update_special_events(special_events)
 
 
