@@ -19,6 +19,8 @@ import random
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = script_dir + '/data/'
 notes_dir = script_dir + "/daily_notes/"
+daily_note_dir = script_dir + "/daily_notes/"
+dad_note_dir = script_dir + "/dad_notes/"
 
 
 
@@ -126,13 +128,17 @@ def write_contents_to_markdown(chore: str,
     note = (
         "##### Daily Chore:\n" + chore + "\n" + 
         "------------------------------------\n" + 
-        "##### Daily Workout Options:\n" + workouts + "\n" + 
+        "##### Daily Workout:\n" + workouts + "\n" + 
         "------------------------------------\n" +
         "##### Daily Lens:\n" + lens + "\n" +
         "------------------------------------\n" + 
         "##### Special Events:\n" + special_events +
         "------------------------------------\n" + 
-        "##### Current Project Statuses:\n" + project_statuses + "\n\n"
+        "##### Current Project Statuses:\n" + project_statuses + "\n" + 
+        "------------------------------------\n" + 
+        "##### Notes:\n## \n" +
+        "------------------------------------\n" + 
+        "##### Dad Notes:\n## \n"
     )
     current_date = datetime.now()
     date = f'{current_date.year}-{current_date.month}-{current_date.day}'
@@ -143,14 +149,18 @@ def write_contents_to_markdown(chore: str,
 def create_new_entry() -> None:
     chore: str = select_chore()
     print(chore)
+    
     workout_options: str = select_workouts()
     print(workout_options)
+    
     lens: str = select_lens()
     print(lens)
-    project_statuses: str = show_project_statuses()
-    print(project_statuses)
+    
     events: str = show_special_events()
     print(events)
+    
+    project_statuses: str = show_project_statuses()
+    print(project_statuses)
     
     write_contents_to_markdown(chore=chore,
                               workouts=workout_options,
@@ -199,7 +209,6 @@ def update_project_statuses(statuses: list) -> None:
         completed = (status[0:9] == '    - [x]') if subgoal else (status[0:5] == '- [x]')
         task = status[10:] if subgoal else status[6:]
         parsed_statuses[task] = { 'is_subgoal': subgoal, 'is_completed': completed }    
-    print(parsed_statuses)
     
     # import json as dictionary and then update the dictionary
     with open(data_dir + 'projects_status.json') as status_file:
@@ -243,6 +252,27 @@ def update_special_events(special_events: list):
             json.dump(events, events_file, indent=2)
                 
 
+def update_notes(notes: list, date: str) -> None:
+    if notes == ['## ']:
+        print(notes)
+        return
+    
+    title = notes[0][3:]
+    note = "\n".join(notes) + f"\n\n{date}"
+    with open(daily_note_dir + title + ".md", 'w') as note_file:
+        note_file.write(note)
+
+
+def update_dad_notes(dad_notes: list, date: str) -> None:
+    if dad_notes == ['## ']:
+        print(dad_notes)
+        return
+    
+    title = dad_notes[0][3:]
+    note = "\n".join(dad_notes) + f"\n\n{date}"
+    with open(dad_note_dir + title + ".md", 'w') as note_file:
+        note_file.write(note)
+
 
 def update_data_files() -> None:
     current_date = datetime.now()
@@ -258,11 +288,23 @@ def update_data_files() -> None:
     
     update_workouts()
     
+    special_events = sections[3].splitlines()[1:]
+    update_special_events(special_events)
+    
     project_statuses = sections[4].splitlines()[1:]
     update_project_statuses(project_statuses)
     
-    special_events = sections[3].splitlines()[1:]
-    update_special_events(special_events)
+    notes = sections[5].splitlines()[1:]
+    update_notes(notes, date)
+    
+    dad_notes = sections[6].splitlines()[1:]
+    update_dad_notes(dad_notes, date)
+    
+
+def delete_entry() -> None:
+    current_date = datetime.now()
+    date = f'{current_date.year}-{current_date.month}-{current_date.day}'
+    os.remove(notes_dir + f"dailynote_{date}.md")
 
 
 def main():
@@ -277,6 +319,7 @@ def main():
         create_new_entry()
     elif option == "update":
         update_data_files()
+        delete_entry()
     else:
         pass
 
