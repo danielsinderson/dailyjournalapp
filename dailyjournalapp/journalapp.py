@@ -63,21 +63,6 @@ def select_workouts() -> str:
     return workout_string
 
 
-def select_lens() -> str:
-    """
-    Accesses procgen_tarot.json, loads it, and randomly selects a card.
-    
-    Returns string containing the day's reading to use for reflection.
-    """
-    with open(data_dir + 'procgen_tarot.json') as tarot_file:
-        tarot: dict = json.load(tarot_file)
-        cards: list = tarot['cards']
-    
-    card = random.choice(cards)
-    lens = f'- Your lens for the day is {card["word"]}.\n- {card["interpretation"]}'
-    return lens
-
-
 def show_project_statuses() -> str:
     with open(data_dir + 'projects_status.json') as project_statuses_file:
         projects: list = json.load(project_statuses_file)['projects']
@@ -120,7 +105,6 @@ def show_special_events() -> str:
 
 def write_contents_to_markdown(chore: str, 
                                workouts: str, 
-                               lens: str,
                                project_statuses: str,
                                special_events: str
                                ) -> None:
@@ -128,8 +112,6 @@ def write_contents_to_markdown(chore: str,
         "##### Daily Chore:\n" + chore + "\n" + 
         "------------------------------------\n" + 
         "##### Daily Workout:\n" + workouts + "\n" + 
-        "------------------------------------\n" +
-        "##### Daily Lens:\n" + lens + "\n" +
         "------------------------------------\n" + 
         "##### Special Events:\n" + special_events +
         "------------------------------------\n" + 
@@ -152,9 +134,6 @@ def create_new_entry() -> None:
     workout_options: str = select_workouts()
     print(workout_options)
     
-    lens: str = select_lens()
-    print(lens)
-    
     events: str = show_special_events()
     print(events)
     
@@ -163,7 +142,6 @@ def create_new_entry() -> None:
     
     write_contents_to_markdown(chore=chore,
                               workouts=workout_options,
-                              lens=lens,
                               project_statuses=project_statuses,
                               special_events=events)
 
@@ -293,16 +271,16 @@ def update_data_files() -> None:
     workout = sections[1].splitlines()[1]
     update_workouts(workout)
     
-    special_events = sections[3].splitlines()[1:]
+    special_events = sections[2].splitlines()[1:]
     update_special_events(special_events)
     
-    project_statuses = sections[4].splitlines()[1:]
+    project_statuses = sections[3].splitlines()[1:]
     update_project_statuses(project_statuses)
     
-    notes = sections[5].splitlines()[1:]
+    notes = sections[4].splitlines()[1:]
     update_notes(notes, date)
     
-    dad_notes = sections[6].splitlines()[1:]
+    dad_notes = sections[5].splitlines()[1:]
     update_dad_notes(dad_notes, date)
     
 
