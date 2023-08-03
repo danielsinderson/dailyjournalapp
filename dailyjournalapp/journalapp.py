@@ -59,8 +59,7 @@ def select_workouts() -> str:
     
     day = workouts['current_day']
     workout = workouts['schedule'][day]
-    workout_string = "- [ ] Your workout for today is to do the following exercises:\n"
-    workout_string += "    - [ ] " + "\n    - [ ] ".join(workout)
+    workout_string = f"- [ ] Your workout for today is a {workout} workout."
     return workout_string
 
 
@@ -188,12 +187,17 @@ def update_chores(chore: str) -> None:
             json.dump(chores, chores_file, indent=2)
 
 
-def update_workouts() -> None:
+def update_workouts(workout) -> None:
+    # parse if done
+    done = (workout[0:5] == '- [x]')
+    
     # import json as dictionary and then update the dictionary
     with open(data_dir + 'daily_workout.json') as workouts_file:
         workouts: dict = json.load(workouts_file)
-    workouts['current_day'] += 1
-    workouts['current_day'] %= 7
+    
+    if done:
+        workouts['current_day'] += 1
+        workouts['current_day'] %= 7
     
     # export the dictionary to update json
     with open(data_dir + 'daily_workout.json', 'w') as workouts_file:
@@ -268,7 +272,7 @@ def update_dad_notes(dad_notes: list, date: str) -> None:
         print(dad_notes)
         return
     
-    title = dad_notes[0][3:]
+    title = date + dad_notes[0][3:]
     note = "\n".join(dad_notes) + f"\n\n{date}"
     with open(dad_note_dir + title + ".md", 'w') as note_file:
         note_file.write(note)
@@ -286,7 +290,8 @@ def update_data_files() -> None:
     chore = sections[0].splitlines()[3]
     update_chores(chore)
     
-    update_workouts()
+    workout = sections[1].splitlines()[1]
+    update_workouts(workout)
     
     special_events = sections[3].splitlines()[1:]
     update_special_events(special_events)
