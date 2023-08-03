@@ -12,6 +12,7 @@ It will do the following:
 import sys
 import os
 from datetime import datetime
+from datetime import timedelta
 import json
 import random
 
@@ -63,6 +64,28 @@ def select_workouts() -> str:
     return workout_string
 
 
+def show_appointments() -> str :
+    # load appointments.json into dictionary
+    with open(data_dir + 'appointments.json') as appointments_file:
+        appointments: dict = json.load(appointments_file)
+    
+    # get current date
+    current_date = datetime.now()
+    date = f'{current_date.month}-{current_date.day}'
+    
+    # get appointments that are happening on the current date
+    appointments_today = []
+    for appointment in appointments.keys():
+        appointment_date = appointments[appointment]["date"].split(' ')[0]
+        appointment_time = appointments[appointment]["date"].split(' ')[1]
+        if appointment_date == date:
+            name = appointment
+            appointments_today.append(f"{name} at {appointment_time}")
+    
+    reminders = "You have the following appointments today\n- " + "\n- ".join(appointments_today) + "\n"
+    return reminders
+    
+
 def show_project_statuses() -> str:
     with open(data_dir + 'projects_status.json') as project_statuses_file:
         projects: list = json.load(project_statuses_file)['projects']
@@ -105,6 +128,7 @@ def show_special_events() -> str:
 
 def write_contents_to_markdown(chore: str, 
                                workouts: str, 
+                               appointments: str,
                                project_statuses: str,
                                special_events: str
                                ) -> None:
@@ -113,9 +137,11 @@ def write_contents_to_markdown(chore: str,
         "------------------------------------\n" + 
         "##### Daily Workout:\n" + workouts + "\n" + 
         "------------------------------------\n" + 
+        "##### Appointments:\n" + appointments +
+        "------------------------------------\n" + 
         "##### Special Events:\n" + special_events +
         "------------------------------------\n" + 
-        "##### Current Project Statuses:\n" + project_statuses + "\n" + 
+        "##### Current Project Statuses:\n" + project_statuses + 
         "------------------------------------\n" + 
         "##### Notes:\n## \n" +
         "------------------------------------\n" + 
@@ -134,6 +160,9 @@ def create_new_entry() -> None:
     workout_options: str = select_workouts()
     print(workout_options)
     
+    appointments: str = show_appointments()
+    print(appointments)
+    
     events: str = show_special_events()
     print(events)
     
@@ -142,6 +171,7 @@ def create_new_entry() -> None:
     
     write_contents_to_markdown(chore=chore,
                               workouts=workout_options,
+                              appointments=appointments,
                               project_statuses=project_statuses,
                               special_events=events)
 
@@ -165,7 +195,7 @@ def update_chores(chore: str) -> None:
             json.dump(chores, chores_file, indent=2)
 
 
-def update_workouts(workout) -> None:
+def update_workouts(workout: str) -> None:
     # parse if done
     done = (workout[0:5] == '- [x]')
     
@@ -181,6 +211,33 @@ def update_workouts(workout) -> None:
     with open(data_dir + 'daily_workout.json', 'w') as workouts_file:
             json.dump(workouts, workouts_file, indent=2)
 
+
+def update_appointments(appointments: list) -> None:
+    # parse appointments
+    done_appointments = [appointment[2:-9] for appointment in appointments]
+    
+    # import json as dictionary and then update the dictionary
+    with open(data_dir + 'appointments.json') as appointments_file:
+        appointments: dict = json.load(appointments_file)
+    
+    appointments_to_delete = []
+    for appointment in appointments.keys():
+        if appointment not in done_appointments:
+            continue
+        
+        if appointments[appointment]["recurring"]:
+            time = appointments[appointment]["date"].split(' ')[1]
+            new_date = datetime.now() + timedelta(days=7)
+            appointments[appointment]["date"] = f"{new_date.month}-{new_date.day} {time}"
+        else: 
+            appointments_to_delete += [appointment]
+    
+    for appointment in appointments_to_delete:
+        del appointments[appointment]
+        
+    # export the dictionary to update json
+    with open(data_dir + 'appointments.json', 'w') as appointments_file:
+            json.dump(appointments, appointments_file, indent=2)
 
 def update_project_statuses(statuses: list) -> None:
     # parse the statuses of the project goals / subgoals from the day to see what got done
@@ -236,7 +293,6 @@ def update_special_events(special_events: list):
 
 def update_notes(notes: list, date: str) -> None:
     if notes == ['## ']:
-        print(notes)
         return
     
     title = notes[0][3:]
@@ -247,7 +303,6 @@ def update_notes(notes: list, date: str) -> None:
 
 def update_dad_notes(dad_notes: list, date: str) -> None:
     if dad_notes == ['## ']:
-        print(dad_notes)
         return
     
     title = date + dad_notes[0][3:]
@@ -271,16 +326,20 @@ def update_data_files() -> None:
     workout = sections[1].splitlines()[1]
     update_workouts(workout)
     
-    special_events = sections[2].splitlines()[1:]
+    appointments = sections[2].splitlines()[2:]
+    print(appointments)
+    update_appointments(appointments)
+    
+    special_events = sections[3].splitlines()[1:]
     update_special_events(special_events)
     
-    project_statuses = sections[3].splitlines()[1:]
+    project_statuses = sections[4].splitlines()[1:]
     update_project_statuses(project_statuses)
     
-    notes = sections[4].splitlines()[1:]
+    notes = sections[5].splitlines()[1:]
     update_notes(notes, date)
     
-    dad_notes = sections[5].splitlines()[1:]
+    dad_notes = sections[6].splitlines()[1:]
     update_dad_notes(dad_notes, date)
     
 
