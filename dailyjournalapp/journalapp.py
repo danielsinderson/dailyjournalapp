@@ -37,11 +37,14 @@ def select_chore() -> str:
     # create a list of chores 
     chores_list = [chore for chore in chores.keys()]
     #filter out the chores that have already been completed this cycle
-    filtered_list = [chore for chore in chores_list if chores[chore][0] != chores[chore][1]]
+    filtered_list = [chore for chore in chores_list if 
+                     chores[chore]['count'] != chores[chore]['frequency'] and 
+                     chores[chore]['countdown'] == 0]
+    
     
     if filtered_list == []:  # if all chores have been completed, restart the cycle
         for chore in chores.keys():
-            chores[chore][0] = 0
+            chores[chore]['count'] = 0
         chore = random.choice(chores_list)
     else:  # else pick one of the remaining chores at random
         chore = random.choice(filtered_list)
@@ -188,7 +191,12 @@ def update_chores(chore: str) -> None:
         chores: dict = json.load(chores_file)
     
     if done:
-        chores[chore][0] += 1
+        chores[chore]['count'] += 1
+        chores[chore]['countdown'] = chores[chore]['delay']
+    
+    for c in chores:
+        if c != chore and chores[c]['countdown'] > 0:
+            chores[c]['countdown'] -= 1
     
     # export the dictionary to update json
     with open(data_dir + 'chores.json', 'w') as chores_file:
