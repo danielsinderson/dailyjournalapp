@@ -90,15 +90,17 @@ def show_appointments() -> str :
     
 
 def show_project_statuses() -> str:
-    with open(data_dir + 'projects_status.json') as project_statuses_file:
-        projects: list = json.load(project_statuses_file)['projects']
+    with open(data_dir + 'projects.json') as projects_file:
+        projects: list = json.load(projects_file)
     
-    in_progress = [project for project in projects if project['status'] == 'In Progress']
     statuses = ""
-    for project in in_progress:
-        project_name = project['project_name']
-        subgoals_in_progress = [subgoal for subgoal in project['subgoals'].keys() if project['subgoals'][subgoal] == 'In Progress']
-        statuses += "- [ ] " + project_name + "\n    - [ ] " + "\n    - [ ] ".join(subgoals_in_progress[:3]) + "\n"
+    for project_name, project_status in projects.items():
+        statuses += "****" + project_name + "****" + "\n"
+        goals = project_status.keys()
+        for index, goal in enumerate(goals):
+            if index > 2: 
+                break
+            statuses += "- " + goal + "\n    " + project_status[goal][0] + "\n\n"
     return statuses
 
 
@@ -247,36 +249,35 @@ def update_appointments(appointments: list) -> None:
     with open(data_dir + 'appointments.json', 'w') as appointments_file:
             json.dump(appointments, appointments_file, indent=2)
 
+
 def update_project_statuses(statuses: list) -> None:
-    # parse the statuses of the project goals / subgoals from the day to see what got done
-    parsed_statuses = {}
-    
-    for status in statuses:
-        subgoal = (status[0:4] == '    ')
-        completed = (status[0:9] == '    - [x]') if subgoal else (status[0:5] == '- [x]')
-        task = status[10:] if subgoal else status[6:]
-        parsed_statuses[task] = { 'is_subgoal': subgoal, 'is_completed': completed }    
-    
     # import json as dictionary and then update the dictionary
-    with open(data_dir + 'projects_status.json') as status_file:
-        statuses: dict = json.load(status_file)
+    with open(data_dir + 'projects.json') as status_file:
+        projects: dict = json.load(status_file)
     
-    for project_task, project_status in parsed_statuses.items():
-        if not project_status['is_completed']:
-            continue
-        
-        for project in statuses['projects']:
-            if project_status['is_subgoal']:
-                for subgoal in project['subgoals'].keys():
-                    if subgoal == project_task:
-                        project['subgoals'][subgoal] = 'Complete'
-            else: 
-                if project['project_name'] == project_task:
-                    project['status'] = 'Complete'
-            
+    current_project = ""
+    current_goal = ""
+    goals_to_delete = []
+    for status in statuses:
+        if status == "\n":
+            continue        
+        elif status[:2] == "**":
+            current_project = status[4:-4]
+        elif status[:2] == "- ":
+            current_goal = status[2:]
+        elif status[:9] == "    - [x]":
+            subgoal = status[4:]
+            subgoal = subgoal.replace("x", " ")
+            projects[current_project][current_goal].remove(subgoal)
+            if projects[current_project][current_goal] == []:
+                goals_to_delete.append([current_project, current_goal])
+    
+    for goal in goals_to_delete:
+        del projects[goal[0]][goal[1]]
+               
     # export the dictionary to update json
-    with open(data_dir + 'projects_status.json', 'w') as status_file:
-            json.dump(statuses, status_file, indent=2)
+    with open(data_dir + 'projects.json', 'w') as status_file:
+            json.dump(projects, status_file, indent=2)
 
 
 def update_special_events(special_events: list):
@@ -335,7 +336,6 @@ def update_data_files() -> None:
     update_workouts(workout)
     
     appointments = sections[2].splitlines()[2:]
-    print(appointments)
     update_appointments(appointments)
     
     special_events = sections[3].splitlines()[1:]
