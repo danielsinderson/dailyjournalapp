@@ -93,15 +93,17 @@ def show_project_statuses() -> str:
     with open(data_dir + 'projects.json') as projects_file:
         projects: list = json.load(projects_file)
     
-    statuses = ""
-    for project_name, project_status in projects.items():
-        statuses += "****" + project_name + "****" + "\n"
-        goals = project_status.keys()
-        for index, goal in enumerate(goals):
-            if index > 2: 
-                break
-            statuses += "- " + goal + "\n    " + project_status[goal][0] + "\n\n"
-    return statuses
+    projects_string = ""
+    for project_name, project_goals in projects.items():
+        in_progress = lambda string: string[-1] == "*"
+        if in_progress(project_name):
+            projects_string += "###### " + project_name[:-2] + "\n"
+            next_goals = [goal for goal in project_goals.keys() if in_progress(goal)]
+            for goal in next_goals:
+                print(goal)
+                print(project_goals[goal])
+                projects_string += "- " + goal[:-2] + "\n    " + "\n    ".join(project_goals[goal][:2]) + "\n"
+    return projects_string
 
 
 def show_special_events() -> str:
@@ -261,10 +263,10 @@ def update_project_statuses(statuses: list) -> None:
     for status in statuses:
         if status == "\n":
             continue        
-        elif status[:2] == "**":
-            current_project = status[4:-4]
+        elif status[:6] == "######":
+            current_project = status[7:] + " *"
         elif status[:2] == "- ":
-            current_goal = status[2:]
+            current_goal = status[2:] + " *"
         elif status[:9] == "    - [x]":
             subgoal = status[4:]
             subgoal = subgoal.replace("x", " ")
